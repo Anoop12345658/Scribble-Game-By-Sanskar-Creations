@@ -1,163 +1,110 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Scribble Game</title>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Pacifico"> 
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      padding: 0;
-      background-image: url('path/to/background.jpg'); /* Replace with your background image */
-      background-size: cover;
-    }
-
-    .container {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      height: 100vh;
-    }
-
-    canvas {
-      margin: 0 auto;
-      border: 1px solid black;
-    }
-
-    .buttons {
-      display: flex;
-      gap: 1rem;
-    }
-
-    .timer {
-      font-size: 1.5rem;
-      margin-top: 1rem;
-    }
-
-    h1 {
-      font-family: 'Pacifico', cursive; 
-      font-size: 3rem;
-      color: #ff0000; 
-      text-shadow: 2px 2px 5px #000000;
-    }
-
-    button {
-      background-color: #4CAF50; 
-      border: none;
-      color: white;
-      padding: 18px 36px; 
-      text-align: center;
-      text-decoration: none;
-      display: inline-block;
-      font-size: 18px; 
-      transition: background-color 0.3s ease; 
-    }
-
-    button:hover {
-      background-color: #3e8e41; 
-    }
-
-    @media screen and (max-width: 768px) {
-      canvas {
-        width: 90vw;
-        height: 90vh;
-      }
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scribble Game</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Pacifico">
+    <style>
+        /* ... (Your existing CSS styles) */
+    </style>
 </head>
 <body>
-  <div class="container">
-    <h1>Sanskar Creations</h1> 
-    <h1>Scribble Game</h1>
-    <canvas id="canvas" width="500" height="500"></canvas>
-    <div class="buttons">
-      <button id="start-button">Start</button>
-      <button id="reset-button">Reset</button>
+    <div class="container">
+        <h1>Sanskar Creations</h1>
+        <h1>Scribble Game</h1>
+        <canvas id="canvas" width="500" height="500"></canvas>
+        <div class="buttons">
+            <button id="start-button">Start</button>
+            <button id="reset-button">Reset</button>
+        </div>
+        <div class="timer">00:00</div>
     </div>
-    <div class="timer">00:00</div>
-  </div>
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const startButton = document.getElementById('start-button');
+        const resetButton = document.getElementById('reset-button');
+        const timer = document.querySelector('.timer');
 
-  <script>
-    const canvas = document.getElementById('canvas');
-  const ctx = canvas.getContext('2d');
-  const startButton = document.getElementById('start-button');
-  const resetButton = document.getElementById('reset-button');
-  const timer = document.querySelector('.timer');
+        let isDrawing = false;
+        let x = 0;
+        let y = 0;
+        let time = 0;
+        let intervalId = null;
 
-  let isDrawing = false;
-  let x = 0;
-  let y = 0;
-  let time = 0;
-  let intervalId = null;
+        const startGame = () => {
+            isDrawing = true;
+            intervalId = setInterval(updateTimer, 1000);
+        };
 
-  const startGame = () => {
-    isDrawing = true;
-    intervalId = setInterval(updateTimer, 1000);
-  };
+        const resetGame = () => {
+            isDrawing = false;
+            clearInterval(intervalId);
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            time = 0;
+            timer.textContent = '00:00';
+        };
 
-  const resetGame = () => {
-    isDrawing = false;
-    clearInterval(intervalId);
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    time = 0;
-    timer.textContent = '00:00';
-  };
+        const updateTimer = () => {
+            time++;
+            const minutes = Math.floor(time / 60);
+            const seconds = time % 60;
+            timer.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        };
 
-  const updateTimer = () => {
-    time++;
-    const minutes = Math.floor(time / 60);
-    const seconds = time % 60;
-    timer.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-  };
+        // Mouse event handlers (for desktop)
+        canvas.addEventListener('mousedown', (e) => {
+            const canvasOffset = canvas.getBoundingClientRect();
+            x = e.clientX - canvasOffset.left;
+            y = e.clientY - canvasOffset.top;
+            startGame();
+        });
 
-  const drawLine = (e) => {
-    if (!isDrawing) return;
-    const touch = e.touches[0];
-    const canvasOffset = canvas.getBoundingClientRect();
-    const touchX = touch.clientX - canvasOffset.left;
-    const touchY = touch.clientY - canvasOffset.top;
+        canvas.addEventListener('mousemove', (e) => {
+            if (!isDrawing) return;
+            const canvasOffset = canvas.getBoundingClientRect();
+            const mouseX = e.clientX - canvasOffset.left;
+            const mouseY = e.clientY - canvasOffset.top;
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+            ctx.lineTo(mouseX, mouseY);
+            ctx.stroke();
+            x = mouseX;
+            y = mouseY;
+        });
 
-    ctx.beginPath();
-    ctx.moveTo(x, y);
-    ctx.lineTo(touchX, touchY);
-    ctx.stroke();
+        canvas.addEventListener('mouseup', () => {
+            isDrawing = false;
+        });
 
-    x = touchX;
-    y = touchY;
-  };
+        // Touch event handlers (for smartphones)
+        canvas.addEventListener('touchstart', (e) => {
+            const canvasOffset = canvas.getBoundingClientRect();
+            x = e.touches[0].clientX - canvasOffset.left;
+            y = e.touches[0].clientY - canvasOffset.top;
+            startGame();
+        });
 
-  canvas.addEventListener('mousedown', (e) => {
-    const canvasOffset = canvas.getBoundingClientRect();
-    x = e.clientX - canvasOffset.left;
-    y = e.clientY - canvasOffset.top;
-    startGame();
-  });
+        canvas.addEventListener('touchmove', (e) => {
+            if (!isDrawing) return;
+            const canvasOffset = canvas.getBoundingClientRect();
+            const touchX = e.touches[0].clientX - canvasOffset.left;
+            const touchY = e.touches[0].clientY - canvasOffset.top;
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+            ctx.lineTo(touchX, touchY);
+            ctx.stroke();
+            x = touchX;
+            y = touchY;
+        });
 
-  canvas.addEventListener('touchstart', (e) => {
-    e.preventDefault();
-    const touch = e.touches[0];
-    const canvasOffset = canvas.getBoundingClientRect();
-    x = touch.clientX - canvasOffset.left;
-    y = touch.clientY - canvasOffset.top;
-    startGame();
-  });
+        canvas.addEventListener('touchend', () => {
+            isDrawing = false;
+        });
 
-  canvas.addEventListener('mousemove', drawLine);
-  canvas.addEventListener('touchmove', drawLine);
-
-  const endDrawing = () => {
-    isDrawing = false;
-  };
-
-  canvas.addEventListener('mouseup', endDrawing);
-  canvas.addEventListener('touchend', endDrawing);
-
-  startButton.addEventListener('click', startGame);
-  resetButton.addEventListener('click', resetGame);
-  </script>
+        startButton.addEventListener('click', startGame);
+        resetButton.addEventListener('click', resetGame);
+    </script>
 </body>
 </html>
