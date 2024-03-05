@@ -83,81 +83,67 @@
 
   <script>
     const canvas = document.getElementById('canvas');
-  const ctx = canvas.getContext('2d');
-  const startButton = document.getElementById('start-button');
-  const resetButton = document.getElementById('reset-button');
-  const timer = document.querySelector('.timer');
+    const ctx = canvas.getContext('2d');
+    const startButton = document.getElementById('start-button');
+    const resetButton = document.getElementById('reset-button');
+    const timer = document.querySelector('.timer');
 
-  let isDrawing = false;
-  let x = 0;
-  let y = 0;
-  let time = 0;
-  let intervalId = null;
+    let isDrawing = false;
+    let x = 0;
+    let y = 0;
+    let time = 0;
+    let intervalId = null;
 
-  const startGame = () => {
-    isDrawing = true;
-    intervalId = setInterval(updateTimer, 1000);
-  };
+    const startGame = () => {
+      isDrawing = true;
+      intervalId = setInterval(updateTimer, 1000);
+    };
 
-  const resetGame = () => {
-    isDrawing = false;
-    clearInterval(intervalId);
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    time = 0;
-    timer.textContent = '00:00';
-  };
+    const resetGame = () => {
+      isDrawing = false;
+      clearInterval(intervalId);
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      time = 0;
+      timer.textContent = '00:00';
+    };
 
-  const updateTimer = () => {
-    time++;
-    const minutes = Math.floor(time / 60);
-    const seconds = time % 60;
-    timer.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-  };
+    const updateTimer = () => {
+      time++;
+      const minutes = Math.floor(time / 60);
+      const seconds = time % 60;
+      timer.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    };
 
-  const drawLine = (e) => {
-    if (!isDrawing) return;
-    const touch = e.touches[0];
-    const canvasOffset = canvas.getBoundingClientRect();
-    const touchX = touch.clientX - canvasOffset.left;
-    const touchY = touch.clientY - canvasOffset.top;
+    const drawLine = (e) => {
+      if (!isDrawing) return;
 
-    ctx.beginPath();
-    ctx.moveTo(x, y);
-    ctx.lineTo(touchX, touchY);
-    ctx.stroke();
+      const canvasOffset = canvas.getBoundingClientRect();
+      const mouseX = e.clientX - canvasOffset.left;
+      const mouseY = e.clientY - canvasOffset.top;
 
-    x = touchX;
-    y = touchY;
-  };
+      ctx.beginPath(); 
+      ctx.moveTo(x, y);
+      ctx.lineTo(mouseX, mouseY);
+      ctx.stroke();
 
-  canvas.addEventListener('mousedown', (e) => {
-    const canvasOffset = canvas.getBoundingClientRect();
-    x = e.clientX - canvasOffset.left;
-    y = e.clientY - canvasOffset.top;
-    startGame();
-  });
+      x = mouseX;
+      y = mouseY;
+    };
 
-  canvas.addEventListener('touchstart', (e) => {
-    e.preventDefault();
-    const touch = e.touches[0];
-    const canvasOffset = canvas.getBoundingClientRect();
-    x = touch.clientX - canvasOffset.left;
-    y = touch.clientY - canvasOffset.top;
-    startGame();
-  });
+    canvas.addEventListener('mousedown', (e) => {
+      const canvasOffset = canvas.getBoundingClientRect();
+      x = e.clientX - canvasOffset.left;
+      y = e.clientY - canvasOffset.top;
+      startGame();
+    });
 
-  canvas.addEventListener('mousemove', drawLine);
-  canvas.addEventListener('touchmove', drawLine);
+    canvas.addEventListener('mousemove', drawLine);
+    canvas.addEventListener('mouseup', () => {
+      isDrawing = false;
+    });
 
-  const endDrawing = () => {
-    isDrawing = false;
-  };
-
-  canvas.addEventListener('mouseup', endDrawing);
-  canvas.addEventListener('touchend', endDrawing);
-
-  startButton.addEventListener('click', startGame);
-  resetButton.addEventListener('click', resetGame);
+    startButton.addEventListener('click', startGame);
+    resetButton.addEventListener('click', resetGame);
   </script>
 </body>
 </html>
