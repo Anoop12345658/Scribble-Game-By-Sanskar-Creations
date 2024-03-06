@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -26,6 +26,7 @@
     canvas {
       margin: 0 auto;
       border: 1px solid black;
+      touch-action: none; /* Disable browser touch actions for canvas */
     }
 
     .buttons {
@@ -118,8 +119,17 @@
       if (!isDrawing) return;
 
       const canvasOffset = canvas.getBoundingClientRect();
-      const mouseX = e.clientX - canvasOffset.left;
-      const mouseY = e.clientY - canvasOffset.top;
+      let mouseX, mouseY;
+
+      if (e.touches) {
+        // Touch events on mobile
+        mouseX = e.touches[0].clientX - canvasOffset.left;
+        mouseY = e.touches[0].clientY - canvasOffset.top;
+      } else {
+        // Mouse events on desktop/laptop
+        mouseX = e.clientX - canvasOffset.left;
+        mouseY = e.clientY - canvasOffset.top;
+      }
 
       ctx.beginPath(); 
       ctx.moveTo(x, y);
@@ -137,8 +147,21 @@
       startGame();
     });
 
+    canvas.addEventListener('touchstart', (e) => {
+      const canvasOffset = canvas.getBoundingClientRect();
+      x = e.touches[0].clientX - canvasOffset.left;
+      y = e.touches[0].clientY - canvasOffset.top;
+      startGame();
+    });
+
     canvas.addEventListener('mousemove', drawLine);
+    canvas.addEventListener('touchmove', drawLine);
+
     canvas.addEventListener('mouseup', () => {
+      isDrawing = false;
+    });
+
+    canvas.addEventListener('touchend', () => {
       isDrawing = false;
     });
 
